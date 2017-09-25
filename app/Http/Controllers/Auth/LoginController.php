@@ -37,11 +37,28 @@ class LoginController extends Controller
     public function index(Request $request)
     {
         if ($request->social){
-            $token = $this->LoginWhitSocial($request);
-            if(is_string($token))
+            $data = $this->LoginWhitSocial($request);
+            if(is_array($data)){
+                if($data['token']){
+                    $success = true;
+                    $token = $data['token'];
+                    $user = $data['user'];
+                    return response()->json(compact('success','token','user'));
+                }
+//                $result = $this->userObject->BaseAuthLogin($request);
+//                if(isset($result['token'])){
+//                    $user = $result['user'][0];
+//                    $token = $result['token'];
+//                    $success = $result['success'];
+//                    return response()->json(compact('success','token','user'));
+//                }else{
+//                    return $result;
+//                }
                 return response()->json(compact('token'));
+            }
+
             else
-                return response()->json(array('success' => false, 'massage' => $token['massage']), 203);
+                return response()->json(array('success' => false, 'massage' => $data['token']['massage']), 203);
         }
         else
             return $this->LoginRegular($request);
@@ -52,12 +69,12 @@ class LoginController extends Controller
         $user_social = User::where(function ($q) use ($request){$q->where('fid',$request->id)
             ->OrWhere('gid',$request->id);})->first();
         if($user_social)
-            return JWTAuth::fromUser($user_social);
+            return ['token' => JWTAuth::fromUser($user_social),'user' => $user_social];
         else{
             if($check_email = User::where('email',$request->email)->first()){
                 $check_email->fid = $request->id;
                 $check_email->save();
-                return JWTAuth::fromUser($check_email);
+                return ['token' => JWTAuth::fromUser($check_email),'user' => $check_email];
             }else
                 return app(\App\Http\Controllers\Auth\RegisterController::class)->RegisterScoial($request);
         }
