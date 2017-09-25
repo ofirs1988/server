@@ -45,15 +45,6 @@ class LoginController extends Controller
                     $user = $data['user'];
                     return response()->json(compact('success','token','user'));
                 }
-//                $result = $this->userObject->BaseAuthLogin($request);
-//                if(isset($result['token'])){
-//                    $user = $result['user'][0];
-//                    $token = $result['token'];
-//                    $success = $result['success'];
-//                    return response()->json(compact('success','token','user'));
-//                }else{
-//                    return $result;
-//                }
                 return response()->json(compact('token'));
             }
 
@@ -99,11 +90,8 @@ class LoginController extends Controller
             $user = $result['user'][0];
             $token = $result['token'];
             $success = $result['success'];
-            $permissions = json_decode($user->roles[0]->slug);
-            if(in_array($user->roles[0]->name,$rolesArray)){
-                return response()->json(compact('success','token','user'));
-            }
-            return response()->json(array('massage'=> 'error login'),401);
+            $permissionsList = $result['permissions'];
+                return response()->json(compact('success','token','user','permissionsList'));
         }else{
             return $result;
         }

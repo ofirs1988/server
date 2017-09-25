@@ -27,7 +27,17 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         }catch(TokenInvalidException $e){
             return ['success' => false ,'massage'=> 'The token is invalid'];
         }
-        return ['success' => true];
+        $user = JWTAuth::parseToken()->authenticate()->with('roles')->get();
+        $permissionsList = $this->setPermissions($user[0]['roles']);
+        return ['success' => true,'permissions' => $permissionsList];
+    }
+
+    protected function setPermissions($permissions){
+        $permissionsList = [];
+        foreach ($permissions AS $permission){
+            $permissionsList[$permission->name] = ['permissions' => $permission->permissions];
+        }
+        return $permissionsList;
     }
 
 
@@ -47,7 +57,13 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
             if($user = JWTAuth::toUser($token)){
                if($user->active){
                    $user = $user->with('roles')->get();
-                   return ['success' => true, 'token' => $token,'user' => $user];
+                   $permissions = $user[0]['roles'];
+                   $permissionsList = $this->setPermissions($permissions);
+                   if(is_array($permissionsList))
+                            return ['success' => true, 'token' => $token,'user' => $user
+                       , 'permissions' => $permissionsList];
+                   else
+                       return ['success' => false , 'massage' => 'user not permissions'];
                    //return response()->json(compact('token','user'));
                }else{
                    return ['success' => false , 'massage' => 'user not active'];
@@ -85,9 +101,6 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         //$user->avatar = isset($request->avatar)  ? $request->avatar : ProfilePicDefault;
         $user->avatar = isset($request->avatar)  ? $request->avatar : app_path().'/assets/images/user.png';
         $user->type = isset($request->type) ? $request->type : null;
-        //user role table
-        //$user->role_id = !$request->role  ? 0 : $request->role;
-        //user info table
         $user->age =  isset($request->age)  ? $request->age : null;
         $user->city =  isset($request->city)  ? $request->city : null;
         $user->address = $request->address  ? $request->address : null;
@@ -129,6 +142,7 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
                     $userInfo->gender =  $request->gender;
                     $userInfo->website = $request->website;
                     $userInfo->work = $request->work;
+                    $userInfo->save();
                 }
                 return $user;
         }
