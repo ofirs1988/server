@@ -47,6 +47,7 @@ Route::group(['prefix' => 'user'], function(){
 
 Route::group(['prefix' => 'admin'], function(){
     Route::post('getCampaign', 'CampaignController@getCampaign');
+    Route::post('createCompanyByAdmin', 'CompanyController@create');
 
     Route::group(['prefix' => 'upload'], function(){
         Route::post('uploadVideo', 'UploadController@index');

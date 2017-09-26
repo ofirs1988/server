@@ -7,7 +7,6 @@ interface UserInterface {
     public function getToken($length);
     public function setUser($request);
     public function UpdateUserLogin();
-    public function createUser($request);
     public function setRole($user,$role);
     public function isAuthorized();
     public function BaseAuthLogin($request);

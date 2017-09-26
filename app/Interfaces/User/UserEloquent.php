@@ -90,9 +90,12 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
     {
         $user = new \stdClass();
         //user table
+
+        if(is_array($request))
+            $request = (object) $request;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
-        $user->remember_token = $request->token;
+        //$user->remember_token = $request->token ? $request->token : null;
         $user->created_at = date('Y-m-d H:i:s');
         $user->updated_at = date('Y-m-d H:i:s');
         $user->phone = isset($request->phone) ? $request->phone : null;
@@ -105,21 +108,24 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         $user->type = isset($request->type) ? $request->type : null;
         $user->age =  isset($request->age)  ? $request->age : null;
         $user->city =  isset($request->city)  ? $request->city : null;
-        $user->address = $request->address  ? $request->address : null;
-        $user->hometown = $request->hometown  ? $request->hometown : null;
-        $user->education = $request->education  ? $request->education : null;
+        $user->address = isset($request->address)  ? $request->address : null;
+        $user->hometown = isset($request->hometown)  ? $request->hometown : null;
+        $user->education = isset($request->education)  ? $request->education : null;
         $user->gender =  isset($request->gender)  ? $request->gender : null;
-        $user->website = $request->website  ? $request->website : null;
-        $user->work = $request->work  ? $request->work : null;
-        if(is_object ($user))
-            return $user;
+        $user->website = isset($request->website)  ? $request->website : null;
+        $user->work = isset($request->work)  ? $request->work : null;
+        if(is_object ($user)){
+            return $this->createUser($user);
+        }
         else
             return response()->json(array('success' => false , 'massage' => 'user is not object'), 201);
     }
 
-    public function createUser($request)
+    protected function createUser($request)
     {
         if($request){
+            if(is_array($request))
+                $request = (object) $request;
                 $user = new User();
                 $user->email = $request->email;
                 $user->name = $request->name;

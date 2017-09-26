@@ -52,12 +52,11 @@ class RegisterController extends Controller
         $validator = $this->validators($num = '6' ,$param = 'required|',$request->all());
         if($validator->passes()){
             $result = $this->userObject->setUser($request);
-            $createUser = $this->userObject->createUser($result);
-                if($createUser->active){
-                    return JWTAuth::fromUser($createUser);
+                if($result->active){
+                    return JWTAuth::fromUser($result);
                 }else{
                     return response()->json(array('success' => true,
-                        'data' => $createUser,
+                        'data' => $result,
                         'active' => 0,
                         'massage' => 'User Created'),
                         200);
