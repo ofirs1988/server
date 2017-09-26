@@ -27,8 +27,9 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         }catch(TokenInvalidException $e){
             return ['success' => false ,'massage'=> 'The token is invalid'];
         }
-        $user = JWTAuth::parseToken()->authenticate()->with('roles')->get();
-        $permissionsList = $this->setPermissions($user[0]['roles']);
+        $user = JWTAuth::toUser($token);
+        $userRole = JWTAuth::parseToken()->authenticate()->with('roles')->where('id',$user->id)->get();
+        $permissionsList = $this->setPermissions($userRole[0]['roles']);
         return ['success' => true,'permissions' => $permissionsList];
     }
 
@@ -54,9 +55,10 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
             return ['success' => false , 'massage' => 'could_not_create_token'];
         }
         try {
+
             if($user = JWTAuth::toUser($token)){
                if($user->active){
-                   $user = $user->with('roles')->get();
+                   $user = $user->with('roles')->where('id',$user->id)->get();
                    $permissions = $user[0]['roles'];
                    $permissionsList = $this->setPermissions($permissions);
                    if(is_array($permissionsList))

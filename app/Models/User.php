@@ -38,6 +38,11 @@ class User extends Authenticatable
         return $this->hasOne('App\UserIfno','user_id');
     }
 
+    public function campaign()
+    {
+        return $this->hasOne('App\Campaign','uid');
+    }
+
     public function hasAccess(array $permissions){
         foreach ($this->roles as $role){
             if($role->hasAccess($permissions))
