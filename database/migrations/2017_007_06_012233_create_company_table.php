@@ -16,7 +16,7 @@ class CreateCompanyTable extends Migration
         Schema::create('wt_company',function (Blueprint $table){
             $table->increments('id');
             $table->string('name');
-            $table->string('email')->nullable();
+            $table->string('email');
             $table->string('contact_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('logo')->nullable();

@@ -16,14 +16,15 @@ class CreateCampaignTable extends Migration
         Schema::create('wt_campaign',function (Blueprint $table){
 
             $table->increments('id');
-            $table->string('title');
-            $table->string('slug')->unique();
-            $table->text('body');
+            $table->string('name');
+            $table->text('body')->nullable();
             $table->boolean('published')->default(false);
             $table->unsignedInteger('uid');
+            $table->unsignedInteger('cid');
             $table->timestamps();
 
             $table->foreign('uid')->references('id')->on('wt_users')->onDelete('cascade');
+            $table->foreign('cid')->references('id')->on('wt_company')->onDelete('cascade');
 
         });
     }

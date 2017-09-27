@@ -179,6 +179,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\UserServiceProvider::class,
         App\Providers\CompanyServiceProvider::class,
+        App\Providers\CampaignServiceProvider::class,
         App\Providers\FilesServiceProvider::class,
 
     ],

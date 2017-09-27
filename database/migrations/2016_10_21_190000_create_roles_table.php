@@ -11,15 +11,6 @@ class CreateRolesTable extends Migration
      *
      * @return void
      */
-//    public function up()
-//    {
-//        Schema::create('wt_role', function (Blueprint $table) {
-//            $table->integer('user_id')->unsigned();
-//            $table->foreign('user_id')->references('id')->on('wt_users');
-//            $table->increments('role_id');
-//            $table->timestamps();
-//        });
-//    }
 
     public function up()
     {
