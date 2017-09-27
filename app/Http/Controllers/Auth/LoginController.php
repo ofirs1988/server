@@ -27,6 +27,8 @@ class LoginController extends Controller
     use AuthenticatesUsers;
     protected $userObject;
     protected $redirectTo = '/';
+    const ADMIN = true;
+    const SITE = false;
 
     public function __construct(UserInterface $u)
     {
@@ -72,7 +74,7 @@ class LoginController extends Controller
     }
 
     public function LoginRegular($request){
-        $result = $this->userObject->BaseAuthLogin($request);
+        $result = $this->userObject->BaseAuthLogin($request,self::SITE);
         if(isset($result['token'])){
             $user = $result['user'][0];
             $token = $result['token'];
@@ -84,14 +86,15 @@ class LoginController extends Controller
     }
 
     public function LoginAdmin(Request $request){
-        $result = $this->userObject->BaseAuthLogin($request);
+        $result = $this->userObject->BaseAuthLogin($request,self::ADMIN);
         $rolesArray = ['Administrator','Author','Editor'];
         if(isset($result['token'])){
-            $user = $result['user'][0];
+            $user = $result['user'];
             $token = $result['token'];
             $success = $result['success'];
             $permissionsList = $result['permissions'];
-                return response()->json(compact('success','token','user','permissionsList'));
+            $company = $result['company'];
+                return response()->json(compact('success','token','user','permissionsList','company'));
         }else{
             return $result;
         }

@@ -12,5 +12,10 @@ class Company extends Model
         'id','name','email','contact_name','phone','logo','active','type','op','type_pay','site',           'social_page'
     ];
 
+    public function users()
+    {
+        return $this->belongsToMany('App\User','wt_company_users');
+    }
+
 
 }

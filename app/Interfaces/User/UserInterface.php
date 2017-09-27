@@ -8,6 +8,6 @@ interface UserInterface {
     public function setUser($request);
     public function UpdateUserLogin();
     public function setRole($user,$role);
-    public function isAuthorized();
-    public function BaseAuthLogin($request);
+    public function isAuthorized($param);
+    public function BaseAuthLogin($request,$param);
 }

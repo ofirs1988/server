@@ -43,6 +43,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Campaign','uid');
     }
 
+    public function usersCompany()
+    {
+        return $this->belongsToMany('App\Company','wt_company_users');
+    }
+
     public function hasAccess(array $permissions){
         foreach ($this->roles as $role){
             if($role->hasAccess($permissions))

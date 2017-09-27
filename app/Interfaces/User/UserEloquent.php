@@ -3,7 +3,6 @@ namespace App\Interfaces\User;
 
 use App\User;
 use Illuminate\Support\Facades\Hash;
-use App\Role;
 use App\UserIfno;
 use JWTAuth;
 use Tymon\JWTAuth\JWTException;
@@ -17,32 +16,7 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         $this->user = $u;
     }
 
-    public function isAuthorized()
-    {
-        $token = JWTAuth::getToken();
-        if(!$token)
-            return ['success' => false ,'massage'=> 'Token not provided'];
-        try{
-            JWTAuth::refresh($token);
-        }catch(TokenInvalidException $e){
-            return ['success' => false ,'massage'=> 'The token is invalid'];
-        }
-        $user = JWTAuth::toUser($token);
-        $userRole = JWTAuth::parseToken()->authenticate()->with('roles')->where('id',$user->id)->get();
-        $permissionsList = $this->setPermissions($userRole[0]['roles']);
-        return ['success' => true,'permissions' => $permissionsList];
-    }
-
-    protected function setPermissions($permissions){
-        $permissionsList = [];
-        foreach ($permissions AS $permission){
-            $permissionsList[$permission->name] = ['permissions' => $permission->permissions];
-        }
-        return $permissionsList;
-    }
-
-
-    public function BaseAuthLogin($request)
+    public function BaseAuthLogin($request,$param)
     {
         $credentials = $request->only('email', 'password');
         try {
@@ -55,26 +29,66 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
             return ['success' => false , 'massage' => 'could_not_create_token'];
         }
         try {
-
             if($user = JWTAuth::toUser($token)){
-               if($user->active){
-                   $user = $user->with('roles')->where('id',$user->id)->get();
-                   $permissions = $user[0]['roles'];
-                   $permissionsList = $this->setPermissions($permissions);
-                   if(is_array($permissionsList))
-                            return ['success' => true, 'token' => $token,'user' => $user
-                       , 'permissions' => $permissionsList];
-                   else
-                       return ['success' => false , 'massage' => 'user not permissions'];
-                   //return response()->json(compact('token','user'));
-               }else{
-                   return ['success' => false , 'massage' => 'user not active'];
-               }
+                if($user->active){
+                    if($param){
+                        return $this->isAuthorizedAdmin($user,$token);
+                    }
+                    $user = $user->with('roles')->where('id',$user->id)->get();
+                    $permissions = $user[0]['roles'];
+                    $permissionsList = $this->setPermissions($permissions);
+                    if(is_array($permissionsList))
+                        return ['success' => true, 'token' => $token,'user' => $user
+                            , 'permissions' => $permissionsList];
+                    else
+                        return ['success' => false , 'massage' => 'user not permissions'];
+                }else{
+                    return ['success' => false , 'massage' => 'user not active'];
+                }
             }
         } catch (JWTException $e) {
             return ['success' => false , 'massage' => $e->getMessage()];
         }
+    }
 
+
+    public function isAuthorized($param)
+    {
+        $token = JWTAuth::getToken();
+        if(!$token)
+            return ['success' => false ,'massage'=> 'Token not provided'];
+        try{
+            JWTAuth::refresh($token);
+        }catch(TokenInvalidException $e){
+            return ['success' => false ,'massage'=> 'The token is invalid'];
+        }
+        $user = JWTAuth::toUser($token);
+        if($param){
+            return $this->isAuthorizedAdmin($user,$token);
+        }
+        $userRole = JWTAuth::parseToken()->authenticate()->with('roles')->where('id',$user->id)->get();
+        $permissionsList = $this->setPermissions($userRole[0]['roles']);
+        return ['success' => true,'permissions' => $permissionsList];
+    }
+
+
+    protected function isAuthorizedAdmin($user,$token){
+        $userData = $user->with('roles')->with('usersCompany')->where('id',$user->id)->get();
+        if($userData[0]->usersCompany[0]['id']){
+            $permissionsList = $this->setPermissions($userData[0]['roles']);
+            if($permissionsList){
+                return ['success' => true,'permissions' => $permissionsList,
+                    'company' => $userData[0]->usersCompany[0],'user' => $user,'token' => $token];
+            }
+        }
+    }
+
+    protected function setPermissions($permissions){
+        $permissionsList = [];
+        foreach ($permissions AS $permission){
+            $permissionsList[$permission->name] = ['permissions' => $permission->permissions];
+        }
+        return $permissionsList;
     }
 
     public function setActiveUser($id,$active)
@@ -95,6 +109,7 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
             $request = (object) $request;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
+
         //$user->remember_token = $request->token ? $request->token : null;
         $user->created_at = date('Y-m-d H:i:s');
         $user->updated_at = date('Y-m-d H:i:s');

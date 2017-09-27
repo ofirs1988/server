@@ -9,7 +9,8 @@ use App\Interfaces\User\UserInterface AS User;
 
 class UserController extends Controller
 {
-
+    const ADMIN = true;
+    const SITE = false;
     protected $userObject;
 
     public function __construct(User $u)
@@ -44,14 +45,14 @@ class UserController extends Controller
      */
     public function store()
     {
-        return $this->userObject->isAuthorized();
+        return $this->userObject->isAuthorized(self::SITE);
 
     }
 
 
     public function storeAdmin()
     {
-        return response()->json(array($this->userObject->isAuthorized()),201);
+        return response()->json(array($this->userObject->isAuthorized(self::ADMIN)),201);
     }
 
     /**
