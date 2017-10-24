@@ -8,7 +8,7 @@ class Campaign extends Model
 {
     protected $table = 'wt_campaign';
 
-    public function user()
+    public function users()
     {
         return $this->belongsTo('App\User');
     }

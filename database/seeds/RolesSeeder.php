@@ -15,8 +15,9 @@ class RolesSeeder extends Seeder
         $anonymous = \App\Role::create([
             'name' => 'Anonymous',
             'slug' => 'anonymous',
-            'permissions' => json_encode([
+            'default_permissions' => json_encode([
                 'watching' => true,
+                'advertiser' => false,
             ])
         ]);
 
@@ -24,42 +25,32 @@ class RolesSeeder extends Seeder
         $block = \App\Role::create([
             'name' => 'Block',
             'slug' => 'block',
-            'permissions' => json_encode([
+            'default_permissions' => json_encode([
                 'watching' => false,
+                'advertiser' => false,
             ])
         ]);
 
-        $admin = \App\Role::create([
+        $administrator = \App\Role::create([
             'name' => 'Administrator',
             'slug' => 'administrator',
-            'permissions' => json_encode([
+            'default_permissions' => json_encode([
                 'all-draft' => true,
             ])
         ]);
 
-        $author = \App\Role::create([
-            'name' => 'Author',
-            'slug' => 'author',
-            'permissions' => json_encode([
+        $advertiser = \App\Role::create([
+            'name' => 'Advertiser',
+            'slug' => 'advertiser',
+            'default_permissions' => json_encode([
                 'watching' => true,
-                'Advertiser' => true,
+                'advertiser' => true,
                 'create-video' => true,
                 'edit-video' => true,
                 'edit-campaign' => true,
-            ])
-        ]);
-
-        $editor = \App\Role::create([
-            'name' => 'Editor',
-            'slug' => 'editor',
-            'permissions' => json_encode([
-                'watching' => true,
-                'Advertiser' => true,
-                'create-video' => true,
-                'edit-video' => true,
-                'publish-video' => true,
                 'create-campaign' => true,
-                'edit-campaign' => true,
+                'edit-user' => true,
+                'create-user' => true,
             ])
         ]);
     }

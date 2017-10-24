@@ -1,11 +1,15 @@
 <?php
 namespace App\Interfaces\User;
-
+//{"all-draft":true}
+use App\Company;
 use App\User;
+use App\UsersRole;
 use Illuminate\Support\Facades\Hash;
 use App\UserIfno;
 use JWTAuth;
 use Tymon\JWTAuth\JWTException;
+use DB;
+
 
 class UserEloquent implements \App\Interfaces\User\UserInterface {
 
@@ -34,9 +38,16 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
                     if($param){
                         return $this->isAuthorizedAdmin($user,$token);
                     }
-                    $user = $user->with('roles')->where('id',$user->id)->get();
-                    $permissions = $user[0]['roles'];
-                    $permissionsList = $this->setPermissions($permissions);
+                    $user = User::with('roles')
+                        ->leftjoin('wt_role_users','wt_role_users.user_id','=','wt_users.id')->where('id',$user->id)->get();
+
+
+
+                    $this->checkUserRoles($user);
+
+
+                    $permissions = $user[0]['permissions'];
+                    $permissionsList = $this->setPermissions(json_decode($permissions));
                     if(is_array($permissionsList))
                         return ['success' => true, 'token' => $token,'user' => $user
                             , 'permissions' => $permissionsList];
@@ -66,27 +77,59 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
         if($param){
             return $this->isAuthorizedAdmin($user,$token);
         }
-        $userRole = JWTAuth::parseToken()->authenticate()->with('roles')->where('id',$user->id)->get();
-        $permissionsList = $this->setPermissions($userRole[0]['roles']);
+        $userRole = User::with('roles')
+            ->leftjoin('wt_role_users','wt_role_users.user_id','=','wt_users.id')->where('id',$user->id)->get();
+        $this->checkUserRoles($userRole);
+
+
+        $permissions = $userRole[0]['permissions'];
+        $permissionsList = $this->setPermissions(json_decode($permissions));
         return ['success' => true,'permissions' => $permissionsList];
     }
 
 
     protected function isAuthorizedAdmin($user,$token){
-        $userData = $user->with('roles')->with('usersCompany')->where('id',$user->id)->get();
-        if($userData[0]->usersCompany[0]['id']){
-            $permissionsList = $this->setPermissions($userData[0]['roles']);
+        $userData = User::with('roles')
+            ->leftjoin('wt_role_users','wt_role_users.user_id','=','wt_users.id')->where('id',$user->id)->get();
+        //$userData = $user->with('roles')->with('usersCompany')->leftjoin('wt_role_users','wt_role_users.user_id','=','wt_users.id')->where('id',$user->id)->get();
+
+
+        // if user different Anonymous user And Block
+        if($userData[0]['role_id'] != 1 && $userData[0]['role_id'] != 2){
+            //if Administrator
+            if($userData[0]['role_id'] == 3){
+
+            }
+            //if Advertiser
+            if($userData[0]['role_id'] == 4){
+                $data = $this->getAdvertiser($userData[0]['id']);
+            }
+
+            $permissions = $userData[0]['permissions'];
+            $permissionsList = $this->setPermissions(json_decode($permissions));
             if($permissionsList){
                 return ['success' => true,'permissions' => $permissionsList,
-                    'company' => $userData[0]->usersCompany[0],'user' => $user,'token' => $token];
+                    'user' => $user,'token' => $token ,'data' => $data];
             }
         }
     }
 
+    protected function getAdvertiser($uid){
+        $array = ['company' => false, 'campaign' => false];
+        if(DB::table('wt_company_users')->where('user_id',$uid)->first())
+            $array['company'] = true;
+        if(DB::table('wt_campaign')->where('uid',$uid)->first())
+            $array['campaign'] = true;
+
+        return $array;
+
+    }
+
     protected function setPermissions($permissions){
+
         $permissionsList = [];
-        foreach ($permissions AS $permission){
-            $permissionsList[$permission->name] = ['permissions' => $permission->permissions];
+        foreach ($permissions AS $key => $permission){
+            $permissionsList[$key] = $permission;
         }
         return $permissionsList;
     }
@@ -192,6 +235,21 @@ class UserEloquent implements \App\Interfaces\User\UserInterface {
             $token .= $codeAlphabet[random_int(0, $max-1)];
         }
         return $token;
+    }
+
+
+    protected function checkUserRoles($user){
+
+        if(!$user[0]['active']){
+            return ['error' => 'user not active'];
+        }
+
+        if($user[0]['role_id'] == 2){
+            return ['error' => 'user Blocked'];
+        }
+
+        return true;
+
     }
 
     //    public function getAll()

@@ -16,6 +16,7 @@ class CreateRoleUsersTable extends Migration
         Schema::create('wt_role_users',function (Blueprint $table){
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('role_id');
+            $table->text('permissions')->nullable();
             $table->timestamps();
 
             $table->unique(['user_id','role_id']);

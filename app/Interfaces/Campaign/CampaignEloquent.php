@@ -12,14 +12,17 @@ class CampaignEloquent implements \App\Interfaces\Campaign\CampaignInterface {
     {
         $user = JWTAuth::parseToken()->authenticate();
         $campaign = new Campaign();
-
-        $campaign->title = $request->name;
-        $campaign->slug = isset($request->slug) ? $request->slug : null;
+        $campaign->name = $request->name;
         $campaign->body = isset($request->description) ? $request->description : null;
-        $campaign->published = isset($request->published) ? $request->published : 0;
         $campaign->published = isset($request->published) ? $request->published : 0;
         $campaign->uid = $user->id;
         $campaign->cid = $request->cid;
+        if($campaign->save()){
+            return true;
+        }
+        return false;
+
+
     }
 
     public function getCampaign($request)
@@ -35,6 +38,11 @@ class CampaignEloquent implements \App\Interfaces\Campaign\CampaignInterface {
     public function setCampaign($id)
     {
         // TODO: Implement setCampaign() method.
+    }
+
+    public function deleteCampaigns()
+    {
+        // TODO: Implement deleteCampaigns() method.
     }
 
 }

@@ -18,6 +18,9 @@ class RolesUsersTableSeeder extends Seeder
         DB::table('wt_role_users')->insert([
             'user_id' => 1,
             'role_id' => 3,
+            'permissions' => json_encode([
+                'all-draft' => true,
+            ])
         ]);
     }
 }

@@ -93,8 +93,9 @@ class LoginController extends Controller
             $token = $result['token'];
             $success = $result['success'];
             $permissionsList = $result['permissions'];
-            $company = $result['company'];
-                return response()->json(compact('success','token','user','permissionsList','company'));
+            $data = $result['data'];
+
+                return response()->json(compact('success','token','user','permissionsList','data'));
         }else{
             return $result;
         }

@@ -56,26 +56,6 @@ class User extends Authenticatable
         return false;
     }
 
-//    public function getAllUsers(){
-//        return User::with('role')->with('usersInfo')->get();
-//    }
-//
-//    public function getUserById($id){
-//        return User::with('role')->with('usersInfo')->find($id);
-//    }
-//
-//    public function getUserByName($name){
-//        return User::with('role')->with('usersInfo')->find('name',$name)->get();
-//    }
-//
-//    public function getUserByEmail($email){
-//        return User::with('role')->with('usersInfo')->find('email',$email)->get();
-//    }
-//
-//    public function getUserByFid($fid){
-//        return User::with('role')->with('usersInfo')->find('fid',$fid)->get();
-//    }
-
     public function ActiveUser($id,$active){
 
         $user =  User::find($id);

@@ -6,5 +6,6 @@ interface CampaignInterface {
     public function setCampaign($id);
     public function getCampaign($request);
     public function getCampaigns();
+    public function deleteCampaigns();
 
 }

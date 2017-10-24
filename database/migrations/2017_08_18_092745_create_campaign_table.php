@@ -20,7 +20,7 @@ class CreateCampaignTable extends Migration
             $table->text('body')->nullable();
             $table->boolean('published')->default(false);
             $table->unsignedInteger('uid');
-            $table->unsignedInteger('cid');
+            $table->unsignedInteger('cid')->nullable();
             $table->timestamps();
 
             $table->foreign('uid')->references('id')->on('wt_users')->onDelete('cascade');

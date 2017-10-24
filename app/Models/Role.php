@@ -10,7 +10,11 @@ class Role extends Model
     const UPDATED_AT = 'updated_at';
     protected $table = 'wt_roles';
     protected $fillable = [
-        'name','slug','permissions'
+        'id','name','slug'
+    ];
+
+    protected $hidden = [
+        'default_permissions'
     ];
 
     public function users()
